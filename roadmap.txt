@@ -1,0 +1,161 @@
+
+
+
+
+
+#### **Partie I — Mise en route**
+
+1. **Création de la fenêtre**
+
+   * Définir une fenêtre `pygame.display.set_mode()` de taille 800×600.
+   * Ajouter un titre personnalisé avec les noms/prénoms et charger une icône `foreuse.png`.
+
+2. **Affichage initial**
+
+   * Afficher un vaisseau foreur centré en haut de l’écran.
+   * Dessiner un “sol” gris (rectangle) en bas de l’écran.
+
+---
+
+#### **Partie II — Contrôle du vaisseau**
+
+1. **Déplacement**
+
+   * Permettre les déplacements gauche/droite avec les touches fléchées, en respectant les limites de l’écran.
+
+2. **Foreuse**
+
+   * Lancer une ligne verticale vers le bas depuis le centre du vaisseau à l’aide de la barre espace.
+
+---
+
+#### **Partie III — Minéraux et score**
+
+1. **Grille de blocs**
+
+   * Générer une grille 20×10 sous le sol, chaque bloc ayant un type : roche, fer, or.
+
+2. **Détection de collision**
+
+   * Détruire un bloc si la foreuse le touche et augmenter le score selon le type :
+
+     * roche : +1 pt
+     * fer : +5 pts
+     * or : +20 pts
+
+3. **Affichage du score**
+
+   * Afficher un score en haut à gauche de l’écran.
+
+---
+
+#### **Partie IV — Gestion de l’énergie**
+
+1. **Consommation**
+
+   * Définir une variable `energie = 100`, et décrémenter de 1 par tick lors du forage.
+
+2. **Indicateur**
+
+   * Afficher une barre verte représentant l’énergie en haut à droite.
+
+3. **Arrêt automatique**
+
+   * Désactiver la foreuse lorsque l’énergie est à 0.
+
+---
+
+#### **Partie V — Récupération d’énergie**
+
+1. **Bidons de carburant**
+
+   * Ajouter une probabilité de 10 % qu’un bloc détruit fasse apparaître un bidon (rectangle rouge).
+
+2. **Recharge**
+
+   * Lorsque le vaisseau touche un bidon, ajouter 30 d’énergie (maximum 100) et supprimer le bidon.
+
+---
+
+#### **Partie VI — Profondeur et scrolling**
+
+1. **Descente du décor**
+
+   * Lorsque la foreuse dépasse la moitié de l’écran, faire descendre tout le décor progressivement.
+
+2. **Indicateur de profondeur**
+
+   * Ajouter une variable `profondeur` qui augmente à chaque descente et l’afficher à l’écran.
+
+---
+
+#### **Partie VII — Dangers**
+
+1. **Blocs instables**
+
+   * Attribuer 1 % de chance par tick à chaque bloc d’être instable. Lors de leur destruction, faire tomber une bombe.
+
+2. **Gestion des vies**
+
+   * Ajouter 3 vies au joueur. Une bombe qui touche le vaisseau fait perdre 1 vie. Afficher les vies restantes.
+   * Afficher "Game Over" et arrêter la boucle si les vies tombent à 0.
+
+---
+
+#### **Partie VIII — Boutique**
+
+1. **Accès**
+
+   * En appuyant sur B à la surface (profondeur = 0), afficher un menu de boutique.
+
+2. **Améliorations**
+
+   * Foreuse+ (vitesse ×1.5) — 100 pts
+   * Réservoir+ (max énergie 150) — 150 pts
+   * Blindage+ (vie supplémentaire) — 200 pts
+
+3. **Effet durable**
+
+   * Les effets de la boutique doivent rester actifs jusqu’à la fin de la partie.
+
+---
+
+#### **Partie IX — Effets visuels et sonores**
+
+1. **Étoiles en parallaxe**
+
+   * Ajouter un fond avec 200 étoiles défilant lentement vers le bas.
+
+2. **Effets sonores**
+
+   * Ajouter les sons :
+
+     * `drill.wav` lors du forage
+     * `ding.wav` lors de la collecte de minerais
+     * `boom.wav` pour une bombe
+
+3. **Événements rares**
+
+   * Ajouter un "cristal violet" avec 0,5 % de chance de spawn, valant 100 pts et déclenchant un message temporaire (5 secondes).
+
+---
+
+#### **Partie X — Propositions libres**
+
+* Ajouter génération procédurale de cavernes.
+* Intégrer un chronomètre avec classement local.
+* Implémenter un cycle jour/nuit via `Surface.set_alpha()`.
+
+---
+
+### **Contraintes générales**
+
+* Utiliser uniquement les classes/fonctions disponibles dans Pygame.
+* Structurer le jeu autour d’une boucle principale avec :
+
+  * `dessiner()`
+  * `gererClavierEtSouris()`
+  * logique du jeu
+* Organiser les ressources dans un dossier `assets/`.
+* Ne pas dépasser 600 lignes dans le script principal ;
+
