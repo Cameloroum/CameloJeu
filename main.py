@@ -12,6 +12,7 @@ clock = pygame.time.Clock()
 baseSize = (40, 40)
 imageVaisseau = pygame.image.load("vaisseau.png")  # remplacer par votre sprite de foreuse
 imageVaisseau = pygame.transform.scale(imageVaisseau, baseSize)
+imageVaisseau = pygame.transform.rotate(imageVaisseau, 180)
 
 # Calcul de la position pour centrer le vaisseau en haut
 x_vaisseau = (largeur - baseSize[0]) // 2
@@ -37,7 +38,13 @@ def dessiner():
 
     # Afficher le vaisseau foreur centré en haut
     fenetre.blit(imageVaisseau, positionVaisseau)
-
+def gererClavierEtSouris():
+    global positionVaisseau
+    touchesPressees = pygame.key.get_pressed()
+    if touchesPressees[pygame.K_RIGHT] == True :
+        positionVaisseau = ( positionVaisseau[0] + 5 , positionVaisseau[1])
+    if touchesPressees[pygame.K_LEFT] == True:
+        positionVaisseau = ( positionVaisseau[0] - 5 , positionVaisseau[1])
 # Boucle principale
 continuer = True
 while continuer:
@@ -46,6 +53,7 @@ while continuer:
             continuer = False
 
     dessiner()
+    gererClavierEtSouris()
     pygame.display.flip()
     clock.tick(60)
 
