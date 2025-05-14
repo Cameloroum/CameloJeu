@@ -121,10 +121,8 @@ def detecter_collision_lasers():
                 if bloc is not None and rect_laser.colliderect(bloc['rect']):
                     pts, _ = points_couleurs[bloc['type']]
                     score += pts
-                    print(grille[i][j])
                     grille[i][j] = None   # suppression du bloc
                     collision = True
-                    break
 
             if collision:
                 break
