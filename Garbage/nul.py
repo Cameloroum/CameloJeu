@@ -14,7 +14,7 @@ y_sol = hauteur_fenetre - hauteur_sol          # = 550
 # Foreuse
 baseSize = (40, 40)
 image_foreuse = pygame.transform.rotate(
-    pygame.transform.scale(pygame.image.load("vaisseau.png"), baseSize), 180
+    pygame.transform.scale(pygame.image.load("../vaisseau.png"), baseSize), 180
 )
 position_foreuse = [(largeur_fenetre - baseSize[0]) // 2, 0]
 rectangle_foreuse = pygame.Rect(*position_foreuse, *baseSize)
