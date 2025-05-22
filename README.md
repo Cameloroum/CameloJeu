@@ -1,3 +1,8 @@
+
+                                           STRUCTURE DE MAIN.PY
+
+
+
 | Fonction                           | Rôle                                                                                                          |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `generer_ligne_blocs(y)`           | Génère une ligne de blocs (roche, fer, or) à une position verticale donnée.                                   |
