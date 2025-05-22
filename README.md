@@ -11,3 +11,4 @@
 | `detecter_collision_bidons()`      | Recharge l’énergie si la foreuse entre en contact avec un bidon vert.                                         |
 | `scroll_vers_haut()`               | Fait défiler les blocs vers le haut pour simuler la descente du vaisseau.                                     |
 | `gerer_boutique_evenements(event)` | Gère les interactions avec la boutique via le clavier (touches `B`, `1`, `2`, `3`).                           |
+|Boucle princpale                    | Gère l'éxécution du jeu et de ses composantes, ainsi que la condition d'arrêt                                 
