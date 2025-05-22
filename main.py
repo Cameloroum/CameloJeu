@@ -75,20 +75,28 @@ points_couleurs = {
 }
 grille = []
 
-
+#Génération blocs
 def generer_ligne_blocs(y):
+    """
+        Crée une ligne de blocs à l’ordonnée y.
+
+        Chaque bloc est un dict :
+          { 'type': str, 'rect': pygame.Rect, 'instable': bool }
+        – instable=True => peut se transformer en bombe
+        – La probabilité de bombe augmente avec la profondeur.
+        """
     global proba_bombe
     rangée = []
     for j in range(colonnes):
         btype = random.choices(list(points_couleurs.keys()), weights=[70, 25, 5])[0]  # chance d'apparition
         bloc = pygame.Rect(j * largeur_bloc, y, largeur_bloc, hauteur_bloc)
-        proba_bombe = 0.01 + 0.015 * (profondeur // 1000)
+        proba_bombe = proba_bombe + 0.015 * (profondeur // 1000)
         instable = random.random() < proba_bombe  # % de chance d’être instable
         rangée.append({'type': btype, 'rect': bloc, 'instable': instable})
     return rangée
 
 
-# Initialisation de la grille
+# Initialisation de la grille  # — Génération des 15 premières lignes sous le sol —
 hauteur_sol = 100
 y_sol = hauteur_fenetre - hauteur_sol
 for i in range(15):
@@ -97,6 +105,10 @@ for i in range(15):
 
 # Dessin
 def dessiner():
+    """
+        Dessine la scène complète : décor, blocs, bombes, UI, boutique, etc.
+        Utilise une surface temporaire pour injecter l’effet de tremblement.
+        """
     global tremblement_duree, flash_duree, message_achat_time, message_achat
 
     # Appliquer un léger décalage si tremblement actif
@@ -177,7 +189,7 @@ def dessiner():
         flash = pygame.Surface((largeur_fenetre, hauteur_fenetre))
         flash.set_alpha(100)  # Gestion de la transparence (0 = transparent, 255 = opaque)
         flash.fill((255, 255, 0))
-        fenetre.blit((flash), (0, 0))
+        fenetre.blit(flash, (0, 0))
         flash_duree -= 1
 
     # Boutique
@@ -192,8 +204,12 @@ def dessiner():
         else:
             message_achat = ""  # on l'efface ensuite
 
-
+# affichage de la fin du jeu
 def afficher_game_over():
+    """
+       Affiche un écran GAME OVER, bloque 3 s puis laisse la boucle principale
+       se terminer proprement.
+       """
     grande_police = pygame.font.SysFont(None, 100)
     texte = grande_police.render("GAME OVER", True, (255, 0, 0))
     rect_texte = texte.get_rect(center=(largeur_fenetre // 2, hauteur_fenetre // 2))
@@ -224,6 +240,11 @@ def afficher_boutique():
 
 # Déplacement foreuse
 def deplacer_foreuse():
+    """
+       Gestion des flèches ← → ↓.
+       La foreuse se déplace seulement si elle n’est pas en train de forer.
+       ↓ change simplement l’orientation sans déplacer réellement.
+       """
     global direction_foreuse
     if forage:
         return
@@ -247,6 +268,9 @@ def deplacer_foreuse():
 
 
 def mettre_a_jour_image_foreuse():
+    """
+        Pivote l’image en fonction de la direction actuelle (bas par défaut).
+        """
     global image_foreuse
     if direction_foreuse == "bas":
         image_foreuse = pygame.transform.rotate(image_base, 180)
@@ -257,6 +281,12 @@ def mettre_a_jour_image_foreuse():
 
 
 def gerer_forage():
+    """
+        – Début : si la foreuse touche un bloc → forage=True,
+                  on enregistre le bloc et le timestamp
+        – Fin :   après le délai, on récolte le bloc,
+                  on applique les effets (score, énergie, bombes, bidons)
+        """
     global forage, last_forage, bloc_en_forage, score, energie_base, anim_en_cours, bombes
 
     temps_actuel = pygame.time.get_ticks()
@@ -267,12 +297,12 @@ def gerer_forage():
                 pts, _ = points_couleurs[bloc_en_forage['type']]
                 score += pts
                 energie_base -= 1
-                if bloc_en_forage['instable']:
+                if bloc_en_forage['instable']:                 # Bloc instable => bombe armée
                     bombes.append({
                         'rect': bloc_en_forage['rect'].copy(),
                         'debut': pygame.time.get_ticks()
                     })
-                if random.random() < proba_bidon and bloc_en_forage['instable'] == False:   # un bidon ne doit pas apparaitre sur un bloc instable
+                if random.random() < proba_bidon and bloc_en_forage['instable'] == False:   # un bidon ne doit pas apparaitre sur un bloc instabl
                     bidons.append(bloc_en_forage['rect'].copy())
                 for ligne in grille:
                     if bloc_en_forage in ligne:
@@ -281,12 +311,17 @@ def gerer_forage():
 
             forage = False
             bloc_en_forage = None
+            #  Détection de collision pour démarrer un nouveau forage ----
     else:
         for ligne in grille:
             for bloc in ligne:
                 if not bloc:
                     continue
                 rect = bloc['rect']
+
+
+                # Sélectionner le “rayon” (1-pixel) selon l’orientation
+
                 if direction_foreuse == "bas":
                     cible = pygame.Rect(rectangle_foreuse.centerx - largeur_bloc // 2, rectangle_foreuse.bottom,
                                         largeur_bloc, 1)
@@ -304,8 +339,13 @@ def gerer_forage():
                     anim_en_cours = True
                     return  # On fore un seul bloc
 
-
+# gestion mort bombes etc
 def gerer_bombes():
+    """
+        Parcourt les bombes ; si leur minuterie est écoulée :
+          – dégâts à la foreuse (vies-1, tremblement, flash)
+          – suppression de la bombe
+        """
     global vies, continuer, tremblement_duree, flash_duree
     temps_actuel = pygame.time.get_ticks()
     for bombe in bombes[:]:
@@ -321,6 +361,10 @@ def gerer_bombes():
 
 # Collision bidons
 def detecter_collision_bidons():
+    """
+        Quand la foreuse touche un bidon vert :
+          +30 énergie (sans dépasser le max)
+        """
     global energie_base
     for bidon in bidons[:]:
         if rectangle_foreuse.colliderect(bidon):
@@ -330,11 +374,17 @@ def detecter_collision_bidons():
 
 # Scroll
 def scroll_vers_haut():
+    """
+        Décale toute la grille + objets vers le haut, créant l’illusion
+        que la foreuse descend. Exécuté uniquement quand l’orientation est
+        “bas” et qu’on n’est pas en mode forage.
+        """
     global profondeur
     if forage:
         return
 
-    if direction_foreuse == "bas":   # le vaisseau ne se déplace que par illusion
+    if direction_foreuse == "bas" and position_foreuse[1] >= hauteur_fenetre // 2:
+   # le vaisseau ne se déplace que par illusion
         for ligne in grille:
             for bloc in ligne:
                 if bloc and rectangle_foreuse.colliderect(bloc['rect']):
@@ -361,6 +411,11 @@ def scroll_vers_haut():
 
 
 def gerer_boutique_evenements(event):
+    """
+        Toggle (B) pour ouvrir/fermer.
+        1 : vitesse+, 2 : réservoir+, 3 : blindage+.
+        Déduit les points et affiche un message pendant 3 s.
+        """
     global boutique_active, vitesse_bonus, forage_cooldown_bonus, energie_max_bonus, vies_bonus, score, vies, message_achat, message_achat_time
 
     if event.type == pygame.KEYDOWN:
@@ -397,12 +452,22 @@ while continuer:
         gerer_boutique_evenements(event)    # je check en permanence si la boutique est ouverte pour pouvoir avoir la condition de pause
 
     if not boutique_active:    # Mon code se met en pause si la boutique est ouverte
-        energie_base -= 0.01
+        energie_base -= 0.01   #Drain passif
         deplacer_foreuse()
         mettre_a_jour_image_foreuse()
         detecter_collision_bidons()
         gerer_forage()
-        scroll_vers_haut()
+        #le vaisseau descend et le sol remonte à partir de la moitié de l'écran
+        if direction_foreuse == "bas" and not forage:
+            if position_foreuse[1] < hauteur_fenetre // 2:
+                position_foreuse[1] += SCROLL_SPEED
+                rectangle_foreuse.y = position_foreuse[1]
+            else:
+                scroll_vers_haut()
+        else:
+            scroll_vers_haut()
+
+         # animation de kickback
         if forage and anim_en_cours:
             animation_offset += animation_direction
             if abs(animation_offset) >= 2:  # modifier cette valeur pour que le vaisseau bouge davantage
@@ -417,7 +482,7 @@ while continuer:
 
     dessiner()
     pygame.display.flip()
-    clock.tick(60)
+    clock.tick(60)  #60fps
 
 pygame.quit()
 sys.exit()
