@@ -155,6 +155,5 @@
   * `dessiner()`
   * `gererClavierEtSouris()`
   * logique du jeu
-* Organiser les ressources dans un dossier `assets/`.
-* Ne pas dépasser 600 lignes dans le script principal ;
+
 
