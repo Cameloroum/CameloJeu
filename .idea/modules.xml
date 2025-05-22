@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/CameloJeu.iml" filepath="$PROJECT_DIR$/.idea/CameloJeu.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../Ds Skiman 18 19/.idea/Ds Skiman 18 19.iml" filepath="$PROJECT_DIR$/../Ds Skiman 18 19/.idea/Ds Skiman 18 19.iml" />
-    </modules>
-  </component>
-</project>
