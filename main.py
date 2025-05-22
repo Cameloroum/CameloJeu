@@ -50,7 +50,7 @@ proba_bidon = 0.1
 bombes = []
 vitesse_bombe = 4
 proba_bombe = 0.01
-temps_bombe = 3000
+temps_bombe = 1500
 tremblement_duree = 0
 flash_duree = 0
 
@@ -164,9 +164,11 @@ def dessiner():
     # Vies
     texte_vies = police.render(f"Vies: {vies}", True, (0, 0, 0))
     surface_temp.blit(texte_vies, (10, 50))
+
     #texte boutique
     texte_boutique = police.render("Appuie sur B pour ouvrir la boutique", True, (0, 0, 0))
-    surface_temp.blit(texte_boutique, (largeur_fenetre - 310, hauteur_fenetre - 30))
+    surface_temp.blit(texte_boutique, (350,550))
+
     # Appliquer le tremblement en affichant la surface avec décalage
     fenetre.blit(surface_temp, (offset_x, offset_y))
 
@@ -229,33 +231,13 @@ def deplacer_foreuse():
 
     # Droite
     if touches[pygame.K_RIGHT] and position_foreuse[0] < largeur_fenetre - baseSize[0]:
-        future_rect = rectangle_foreuse.move(5, 0)
-        bloque = False
-        for ligne in grille:
-            for bloc in ligne:
-                if bloc and future_rect.colliderect(bloc['rect']):
-                    bloque = True
-                    break
-            if bloque:
-                break
-        if not bloque:
-            direction_foreuse = "droite"
-            position_foreuse[0] += int(5 * vitesse_bonus)
+        direction_foreuse = "droite"
+        position_foreuse[0] += int(5 * vitesse_bonus)
 
     # Gauche
     if touches[pygame.K_LEFT] and position_foreuse[0] > 0:
-        future_rect = rectangle_foreuse.move(-5, 0)
-        bloque = False
-        for ligne in grille:
-            for bloc in ligne:
-                if bloc and future_rect.colliderect(bloc['rect']):
-                    bloque = True
-                    break
-            if bloque:
-                break
-        if not bloque:
-            direction_foreuse = "gauche"
-            position_foreuse[0] -= int(5 * vitesse_bonus)
+        direction_foreuse = "gauche"
+        position_foreuse[0] -= int(5 * vitesse_bonus)
 
     # Bas (juste pour orientation)
     if touches[pygame.K_DOWN]:
@@ -390,19 +372,19 @@ def gerer_boutique_evenements(event):
                 vitesse_bonus = 1.5
                 forage_cooldown_bonus += 100
                 score -= 100
-                message_achat = "Foreuse améliorée ! "
+                message_achat = "Foreuse amelioree!"
                 message_achat_time = pygame.time.get_ticks()
             elif event.key == pygame.K_2 and score >= 150:
                 energie_max_bonus = 50  # passe de 150 à 200
                 score -= 150
-                message_achat = "Réservoir amélioré !"
+                message_achat = "Reservoir ameliore!"
                 message_achat_time = pygame.time.get_ticks()
 
             elif event.key == pygame.K_3 and score >= 200:
                 vies += 1
                 vies_bonus += 1
                 score -= 200
-                message_achat = "Blindage amélioré !"
+                message_achat = "Blindage ameliore !"
                 message_achat_time = pygame.time.get_ticks()
 
 
