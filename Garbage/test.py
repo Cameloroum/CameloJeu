@@ -10,10 +10,10 @@ pygame.display.set_caption("Ghali")
 clock = pygame.time.Clock()
 
 # Foreuse
-baseSize = (20, 20)
+baseSize = (40, 40)
 image_foreuse = pygame.image.load("vaisseau.png")
 image_foreuse = pygame.transform.scale(image_foreuse, baseSize)
-image_base = image_foreuse
+image_foreuse = pygame.transform.rotate(image_foreuse, 180)
 position_foreuse = [(largeur_fenetre - baseSize[0]) // 2, 0]
 rectangle_foreuse = pygame.Rect(position_foreuse[0], position_foreuse[1], baseSize[0], baseSize[1])
 
@@ -30,17 +30,6 @@ lasers = []
 LASER_SPEED = 10
 LASER_WIDTH, LASER_HEIGHT = 4, 10
 
-#Forage
-forage= False
-last_forage = 0
-bloc_en_forage = None
-forage_cooldown = 250
-direction_foreuse = "droite"  # ou "gauche" ou "bas"
-vitesse_foreuse = 2
-animation_offset = 0
-animation_direction = 1
-
-
 # Score
 score = 0
 police = pygame.font.SysFont(None, 36)
@@ -49,7 +38,7 @@ police = pygame.font.SysFont(None, 36)
 colonnes = 20
 largeur_bloc = largeur_fenetre / colonnes
 hauteur_bloc = 30
-SCROLL_SPEED = 2
+SCROLL_SPEED = 1
 
 # Blocs
 points_couleurs = {
@@ -97,10 +86,7 @@ def dessiner():
         pygame.draw.rect(fenetre, (255, 0, 0), br)
 
     # Foreuse
-    pos_anim = position_foreuse.copy()
-    if forage:
-        pos_anim[1] += animation_offset
-    fenetre.blit(image_foreuse, pos_anim)
+    fenetre.blit(image_foreuse, position_foreuse)
 
     # Lasers
     for x, y in lasers:
@@ -122,103 +108,18 @@ def dessiner():
 
 # Déplacement foreuse
 def deplacer_foreuse():
-    global direction_foreuse
-    if forage:
-        return
     touches = pygame.key.get_pressed()
-
-    # Droite
     if touches[pygame.K_RIGHT] and position_foreuse[0] < largeur_fenetre - baseSize[0]:
-        future_rect = rectangle_foreuse.move(5, 0)
-        bloque = False
-        for ligne in grille:
-            for bloc in ligne:
-                if bloc and future_rect.colliderect(bloc['rect']):
-                    bloque = True
-                    break
-            if bloque:
-                break
-        if not bloque:
-            direction_foreuse = "droite"
-            position_foreuse[0] += 5
-
-    # Gauche
+        position_foreuse[0] += 5
     if touches[pygame.K_LEFT] and position_foreuse[0] > 0:
-        future_rect = rectangle_foreuse.move(-5, 0)
-        bloque = False
-        for ligne in grille:
-            for bloc in ligne:
-                if bloc and future_rect.colliderect(bloc['rect']):
-                    bloque = True
-                    break
-            if bloque:
-                break
-        if not bloque:
-            direction_foreuse = "gauche"
-            position_foreuse[0] -= 5
-
-    # Bas (juste pour orientation)
-    if touches[pygame.K_DOWN]:
-        direction_foreuse = "bas"
-
+        position_foreuse[0] -= 5
     rectangle_foreuse.topleft = position_foreuse
-
-def mettre_a_jour_image_foreuse():
-    global image_foreuse
-    if direction_foreuse == "bas":
-        image_foreuse = pygame.transform.rotate(image_base, 180)
-    elif direction_foreuse == "gauche":
-        image_foreuse = pygame.transform.rotate(image_base, 90)
-    elif direction_foreuse == "droite":
-        image_foreuse = pygame.transform.rotate(image_base, -90)
-
 
 # Mise à jour laser
 def mise_a_jour_lasers():
     for laser in lasers:
         laser[1] += LASER_SPEED
     lasers[:] = [l for l in lasers if l[1] <= hauteur_fenetre]
-
-def gerer_forage():
-    global forage, last_forage, bloc_en_forage, score, energie_base
-
-    temps_actuel = pygame.time.get_ticks()
-
-    if forage:
-        if temps_actuel - last_forage >= forage_cooldown:
-            if bloc_en_forage:
-                pts, _ = points_couleurs[bloc_en_forage['type']]
-                score += pts
-                energie_base -=1
-                if random.random() < proba_bidon:
-                    bidons.append(bloc_en_forage['rect'].copy())
-                for ligne in grille:
-                    if bloc_en_forage in ligne:
-                        ligne.remove(bloc_en_forage)
-                        break
-            forage = False
-            bloc_en_forage = None
-    else:
-        for ligne in grille:
-            for bloc in ligne:
-                if not bloc:
-                    continue
-                rect = bloc['rect']
-                if direction_foreuse == "bas":
-                    cible = pygame.Rect(rectangle_foreuse.centerx - largeur_bloc // 2, rectangle_foreuse.bottom, largeur_bloc, 1)
-                elif direction_foreuse == "gauche":
-                    cible = pygame.Rect(rectangle_foreuse.left - 1, rectangle_foreuse.centery, 1, hauteur_bloc)
-                elif direction_foreuse == "droite":
-                    cible = pygame.Rect(rectangle_foreuse.right, rectangle_foreuse.centery, 1, hauteur_bloc)
-                else:
-                    continue
-
-                if cible.colliderect(rect):
-                    forage = True
-                    last_forage = temps_actuel
-                    bloc_en_forage = bloc
-                    return  # On fore un seul bloc
-
 
 # Collision laser
 def detecter_collision_lasers():
@@ -254,32 +155,16 @@ def detecter_collision_bidons():
 
 # Scroll
 def scroll_vers_haut():
-    if forage:
-        return
-
-    if direction_foreuse == "bas":
-        for ligne in grille:
-            for bloc in ligne:
-                if bloc and rectangle_foreuse.colliderect(bloc['rect']):
-                    gerer_forage()
-                    return
-
-        for ligne in grille:
-            for bloc in ligne:
-                if bloc:
-                    bloc['rect'].y -= SCROLL_SPEED
-
-        for i in range(len(bidons)):
-            bidons[i].y -= SCROLL_SPEED
-
-        if grille and grille[0][0]['rect'].y + hauteur_bloc < 0:
-            grille.pop(0)
-
-        y_nouvelle_ligne = grille[-1][0]['rect'].y + hauteur_bloc
-        grille.append(generer_ligne_blocs(y_nouvelle_ligne))
-
-
-
+    for ligne in grille:
+        for bloc in ligne:
+            if bloc:
+                bloc['rect'].y -= SCROLL_SPEED
+    for i in range(len(bidons)):
+        bidons[i].y -= SCROLL_SPEED
+    if grille and grille[0][0]['rect'].y + hauteur_bloc < 0:
+        grille.pop(0)
+    y_nouvelle_ligne = grille[-1][0]['rect'].y + hauteur_bloc
+    grille.append(generer_ligne_blocs(y_nouvelle_ligne))
 
 # Boucle principale
 continuer = True
@@ -287,26 +172,17 @@ while continuer:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             continuer = False
-        # elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and energie_base > 0:
-        #     depart_x = position_foreuse[0] + baseSize[0] // 2
-        #     depart_y = position_foreuse[1] + baseSize[1]
-        #     lasers.append([depart_x, depart_y])
-        #     energie_base -= 1
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and energie_base > 0:
+            depart_x = position_foreuse[0] + baseSize[0] // 2
+            depart_y = position_foreuse[1] + baseSize[1]
+            lasers.append([depart_x, depart_y])
+            energie_base -= 1
 
     deplacer_foreuse()
-    mettre_a_jour_image_foreuse()
-    # mise_a_jour_lasers()
-    #detecter_collision_lasers()
+    mise_a_jour_lasers()
+    detecter_collision_lasers()
     detecter_collision_bidons()
-    gerer_forage()
     scroll_vers_haut()
-    if forage:
-        animation_offset += animation_direction
-    if abs(animation_offset) > 2:
-        animation_direction *= -1
-    else:
-        animation_offset = 0
-    animation_direction = 1
     dessiner()
     pygame.display.flip()
     clock.tick(60)
