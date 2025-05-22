@@ -164,7 +164,9 @@ def dessiner():
     # Vies
     texte_vies = police.render(f"Vies: {vies}", True, (0, 0, 0))
     surface_temp.blit(texte_vies, (10, 50))
-
+    #texte boutique
+    texte_boutique = police.render("Appuie sur B pour ouvrir la boutique", True, (0, 0, 0))
+    surface_temp.blit(texte_boutique, (largeur_fenetre - 310, hauteur_fenetre - 30))
     # Appliquer le tremblement en affichant la surface avec décalage
     fenetre.blit(surface_temp, (offset_x, offset_y))
 
