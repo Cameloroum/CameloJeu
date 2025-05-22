@@ -85,7 +85,6 @@
 
 2. **Indicateur de profondeur**
 
-   * Ajouter une variable `profondeur` qui augmente à chaque descente et l’afficher à l’écran.
 
 ---
 
