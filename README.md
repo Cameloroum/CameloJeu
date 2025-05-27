@@ -5,6 +5,7 @@
 
 | Fonction                           | Rôle                                                                                                          |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `Constates`                        | Défintion des variables importantes du code et des propriétés du jeu.                                         |
 | `generer_ligne_blocs(y)`           | Génère une ligne de blocs (roche, fer, or) à une position verticale donnée.                                   |
 | `dessiner()`                       | Affiche tous les éléments du jeu : fond, blocs, foreuse, score, énergie, etc.                                 |
 | `afficher_game_over()`             | Affiche l'écran de fin "GAME OVER" pendant 3 secondes.                                                        |
